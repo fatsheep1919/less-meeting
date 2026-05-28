@@ -1,0 +1,9 @@
+services:
+  less-meeting:
+    build: .
+    container_name: less-meeting
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      - ANNOUNCED_IP=${ANNOUNCED_IP}
+      - NODE_ENV=production
