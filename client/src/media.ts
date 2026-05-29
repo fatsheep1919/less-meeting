@@ -153,14 +153,23 @@ export class MediaClient {
   async startProduce(): Promise<void> {
     if (!this.sendTransport) throw new Error('发送 Transport 未创建');
 
-    // 检查浏览器是否支持 getUserMedia
+    // 检查是否在非安全上下文中（HTTP + 非 localhost）
+    const isInsecureHttp = location.protocol === 'http:' &&
+      location.hostname !== 'localhost' &&
+      location.hostname !== '127.0.0.1';
+
     if (!navigator.mediaDevices?.getUserMedia) {
+      if (isInsecureHttp) {
+        throw new Error(
+          'BrowserMediaUnavailable: 当前通过 HTTP 访问，浏览器禁止使用麦克风。\n' +
+          '解决方法：\n' +
+          '1. 配置域名并启用 HTTPS（推荐）\n' +
+          '2. 或使用 http://localhost 在本地测试'
+        );
+      }
       throw new Error(
         'BrowserMediaUnavailable: 当前浏览器不支持麦克风访问。\n' +
-        '请确认：\n' +
-        '1. 使用最新版 Chrome/Edge/Firefox\n' +
-        '2. 通过 https:// 或 http://localhost 访问\n' +
-        '3. 未在隐私模式下禁用媒体权限'
+        '请使用最新版 Chrome/Edge/Firefox。'
       );
     }
 
