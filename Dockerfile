@@ -1,6 +1,11 @@
 # ---- 阶段 1: 构建 ----
 FROM node:22-bookworm AS builder
 
+# mediasoup worker 编译依赖
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 python3-pip make g++ \
+    && rm -rf /var/lib/apt/lists/*
+
 # 服务端：安装依赖 + 编译 TypeScript
 WORKDIR /build/server
 COPY package*.json tsconfig.json ./
@@ -19,14 +24,17 @@ RUN npm run build
 FROM node:22-bookworm-slim
 WORKDIR /app
 
-# mediasoup worker 依赖的 ICE 库
+# mediasoup worker 运行时依赖
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libnice10 \
     && rm -rf /var/lib/apt/lists/*
 
-# 只安装生产依赖
+# 安装生产依赖（跳过 postinstall，mediasoup 从 builder 覆盖）
 COPY --from=builder /build/server/package*.json ./
-RUN npm ci --omit=dev
+RUN npm ci --omit=dev --ignore-scripts
+
+# 用 builder 中已编译好的 mediasoup 覆盖（含 worker 二进制）
+COPY --from=builder /build/server/node_modules/mediasoup ./node_modules/mediasoup
 
 # 复制构建产物
 COPY --from=builder /build/server/dist ./dist
