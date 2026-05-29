@@ -17,7 +17,8 @@ RUN npm run build
 WORKDIR /build/client
 COPY client/package*.json client/tsconfig.json client/vite.config.ts ./
 RUN npm ci
-COPY client/index.html client/src/ ./
+COPY client/index.html ./
+COPY client/src/ ./src/
 RUN npm run build
 
 # ---- 阶段 2: 运行 ----
