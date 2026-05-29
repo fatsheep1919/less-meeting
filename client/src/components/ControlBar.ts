@@ -1,4 +1,4 @@
-import { state, navigateTo } from '../main';
+import { state } from '../main';
 import type { MediaClient } from '../media';
 
 /**
@@ -40,21 +40,26 @@ export function renderControlBar(container: HTMLElement, media: MediaClient): vo
 
   // 退出按钮
   document.getElementById('btn-leave')!.onclick = () => {
-    // 先发信令通知服务端
+    // 通知服务端
     state.signaling?.send({ type: 'LEAVE_ROOM' });
 
-    // 清理资源
+    // 清理媒体资源
     state.media?.close();
     state.signaling?.close();
 
-    // 重置状态
-    state.peers.clear();
-    state.roomId = '';
-    state.displayName = '';
-    state.signaling = null;
-    state.media = null;
+    // 尝试关闭窗口（对于通过 window.open 打开的 tab 有效）
+    window.close();
 
-    navigateTo('lobby');
+    // 如果浏览器不允许关闭（非 js 打开的窗口），显示退出提示
+    setTimeout(() => {
+      if (!window.closed) {
+        document.body.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:center;height:100vh;
+                      background:#0f172a;color:#94a3b8;font-family:sans-serif;font-size:18px">
+            已退出会议，可以关闭此页面
+          </div>`;
+      }
+    }, 300);
   };
 }
 
