@@ -39,7 +39,7 @@ COPY --from=builder /build/server/node_modules/mediasoup ./node_modules/mediasou
 
 # 复制构建产物
 COPY --from=builder /build/server/dist ./dist
-COPY --from=builder /build/client/public ./public
+COPY --from=builder /build/public ./public
 
 EXPOSE 3000
 EXPOSE 40000-49999/udp
