@@ -42,15 +42,25 @@ export function showMeeting(container: HTMLElement): void {
     const showScreen = screenSharePeerId && screenSharePeerId !== state.peerId;
 
     if (showScreen) {
-      // 屏幕共享模式：左侧画面 + 右侧小头像
+      // 屏幕共享模式：视频居左 + 列表占满右侧
       screenContainer.style.display = 'flex';
-      peerArea.style.flex = '';
+      screenContainer.style.flex = '1';
+      peerArea.style.flex = '1';
       renderPeerList(peerArea, speakingPeerIds);
     } else {
       // 默认模式：居中大网格
       screenContainer.style.display = 'none';
+      screenContainer.style.flex = '';
       peerArea.style.flex = '1';
       renderPeerGrid(peerArea, speakingPeerIds);
+    }
+
+    // 别人在共享时，禁用共享按钮
+    const screenBtn = document.getElementById('btn-screen') as HTMLButtonElement;
+    if (screenBtn) {
+      const othersSharing = screenSharePeerId && screenSharePeerId !== state.peerId;
+      screenBtn.disabled = !!othersSharing;
+      screenBtn.title = othersSharing ? '其他人正在共享屏幕' : '共享屏幕';
     }
   }
 
