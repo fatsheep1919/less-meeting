@@ -52,8 +52,9 @@ export function showMeeting(container: HTMLElement): void {
       // 默认模式：居中大网格
       screenContainer.style.display = 'none';
       screenContainer.style.flex = '';
+      // 彻底清除共享模式下遗留的宽高限制
+      peerArea.style.cssText = '';
       peerArea.style.flex = '1';
-      peerArea.style.maxWidth = '';
       renderPeerGrid(peerArea, speakingPeerIds);
     }
 
