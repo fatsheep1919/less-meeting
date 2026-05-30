@@ -70,6 +70,13 @@ export function showMeeting(container: HTMLElement): void {
   // 注册 Consumer 回调
   mediaClient.setOnNewConsumer((peerId, consumer) => {
     if (consumer.kind === 'video') {
+      // 监听远程停止共享（producer 关闭 → consumer track ended）
+      consumer.track.onended = () => {
+        if (screenSharePeerId === peerId) {
+          screenSharePeerId = null;
+          renderLayout();
+        }
+      };
       // 视频流 → 绑定到屏幕共享区
       attachVideoTrack(peerId, consumer.track, () => {
         screenSharePeerId = peerId;
