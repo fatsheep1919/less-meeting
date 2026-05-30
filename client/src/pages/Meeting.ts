@@ -38,7 +38,10 @@ export function showMeeting(container: HTMLElement): void {
     const peerArea = document.getElementById('peer-area')!;
     const screenContainer = document.getElementById('screen-container')!;
 
-    if (screenSharePeerId) {
+    // 自己共享时不展示 screen-container（防止反馈循环）
+    const showScreen = screenSharePeerId && screenSharePeerId !== state.peerId;
+
+    if (showScreen) {
       // 屏幕共享模式：左侧画面 + 右侧小头像
       screenContainer.style.display = 'flex';
       peerArea.style.flex = '';
@@ -73,6 +76,21 @@ export function showMeeting(container: HTMLElement): void {
     }
     renderLayout();
   };
+
+  // 浏览器原生「停止分享」按钮的兜底回调
+  mediaClient.setOnScreenShareEnd(() => {
+    if (screenSharePeerId === state.peerId) {
+      screenSharePeerId = null;
+      renderLayout();
+      // 重置 ControlBar 按钮状态
+      const screenBtn = document.getElementById('btn-screen');
+      if (screenBtn) {
+        screenBtn.classList.remove('active');
+        (screenBtn.querySelector('.icon') as HTMLElement).textContent = '🖥️';
+        (screenBtn.querySelector('.label') as HTMLElement).textContent = '共享屏幕';
+      }
+    }
+  });
 
   // 本地说话状态
   mediaClient.setOnLocalSpeakingChange((isSpeaking) => {

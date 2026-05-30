@@ -221,7 +221,15 @@ export class MediaClient {
       videoProducer.close();
       this.producers.delete('video');
       console.log('[Media] 屏幕共享已停止');
+      this.onScreenShareEnd?.();
     }
+  }
+
+  /** 屏幕共享被外部停止时的回调（浏览器按钮等） */
+  private onScreenShareEnd: (() => void) | null = null;
+
+  setOnScreenShareEnd(fn: () => void): void {
+    this.onScreenShareEnd = fn;
   }
 
   /** 是否正在共享屏幕 */
