@@ -139,6 +139,15 @@ export function showMeeting(container: HTMLElement): void {
     speakingPeerIds.add(msg.peerId);
     renderLayout();
   });
+  // 远程停止屏幕共享
+  signaling.on('SCREEN_SHARE_STOPPED', (msg: ServerMessage) => {
+    if (msg.type !== 'SCREEN_SHARE_STOPPED') return;
+    if (screenSharePeerId === msg.peerId) {
+      screenSharePeerId = null;
+      renderLayout();
+    }
+  });
+
   signaling.on('SPEAKER_INACTIVE', (msg: ServerMessage) => {
     if (msg.type !== 'SPEAKER_INACTIVE') return;
     speakingPeerIds.delete(msg.peerId);

@@ -208,6 +208,18 @@ export function createWSServer(): WebSocketServer {
           return;
         }
 
+        case 'STOP_SCREEN_SHARE': {
+          if (!currentRoomId || !isAuthenticated) return;
+          const room = roomManager.getRoom(currentRoomId);
+          if (room) {
+            broadcastToRoom(room, {
+              type: 'SCREEN_SHARE_STOPPED',
+              peerId,
+            }, peerId);
+          }
+          return;
+        }
+
         case 'SPEAKER_ACTIVE':
         case 'SPEAKER_INACTIVE': {
           if (!currentRoomId || !isAuthenticated) return;

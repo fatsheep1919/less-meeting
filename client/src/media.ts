@@ -218,6 +218,8 @@ export class MediaClient {
   stopScreenShare(): void {
     const videoProducer = this.producers.get('video');
     if (videoProducer) {
+      // 先发信令通知其他人
+      this.signaling.send({ type: 'STOP_SCREEN_SHARE' });
       videoProducer.close();
       this.producers.delete('video');
       console.log('[Media] 屏幕共享已停止');

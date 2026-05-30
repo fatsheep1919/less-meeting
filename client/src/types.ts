@@ -19,6 +19,7 @@ export type ClientMessage =
   | { type: 'CHAT'; text: string }
   | { type: 'SPEAKER_ACTIVE' }
   | { type: 'SPEAKER_INACTIVE' }
+  | { type: 'STOP_SCREEN_SHARE' }
   | { type: 'PING' };
 
 export type ServerMessage =
@@ -30,6 +31,7 @@ export type ServerMessage =
   | { type: 'NEW_CONSUMER'; peerId: string; consumerId: string; kind: 'audio' | 'video'; producerId: string; rtpParameters: Record<string, unknown> }
   | { type: 'SPEAKER_ACTIVE'; peerId: string }
   | { type: 'SPEAKER_INACTIVE'; peerId: string }
+  | { type: 'SCREEN_SHARE_STOPPED'; peerId: string }
   | { type: 'CHAT'; peerId: string; displayName: string; text: string }
   | { type: 'ERROR'; code: string; message: string }
   | { type: 'PONG' };
