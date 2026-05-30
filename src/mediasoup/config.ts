@@ -16,6 +16,15 @@ export const mediaCodecs: types.RtpCodecCapability[] = [
       ...config.audioCodec.parameters,
     },
   },
+  {
+    kind: 'video',
+    mimeType: 'video/VP8',
+    clockRate: 90000,
+    preferredPayloadType: 101,
+    parameters: {
+      'x-google-start-bitrate': 1000,
+    },
+  },
 ];
 
 /**

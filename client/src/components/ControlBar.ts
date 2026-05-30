@@ -4,7 +4,11 @@ import type { MediaClient } from '../media';
 /**
  * 底部控制栏：自己的头像昵称 + 静音 + 退出
  */
-export function renderControlBar(container: HTMLElement, media: MediaClient): void {
+export function renderControlBar(
+  container: HTMLElement,
+  media: MediaClient,
+  onScreenShareChange?: (sharing: boolean) => void,
+): void {
   container.innerHTML = `
     <div class="control-bar">
       <div class="control-self">
@@ -15,6 +19,10 @@ export function renderControlBar(container: HTMLElement, media: MediaClient): vo
       </div>
 
       <div class="control-buttons">
+        <button id="btn-screen" class="ctrl-btn" title="共享屏幕">
+          <span class="icon">🖥️</span>
+          <span class="label">共享屏幕</span>
+        </button>
         <button id="btn-mute" class="ctrl-btn" title="静音">
           <span class="icon">🎤</span>
           <span class="label">麦克风</span>
@@ -28,6 +36,28 @@ export function renderControlBar(container: HTMLElement, media: MediaClient): vo
   `;
 
   const muteBtn = document.getElementById('btn-mute')!;
+
+  // 共享屏幕按钮
+  const screenBtn = document.getElementById('btn-screen')!;
+  screenBtn.onclick = async () => {
+    if (media.isScreenSharing()) {
+      media.stopScreenShare();
+      screenBtn.classList.remove('active');
+      (screenBtn.querySelector('.icon') as HTMLElement).textContent = '🖥️';
+      (screenBtn.querySelector('.label') as HTMLElement).textContent = '共享屏幕';
+      onScreenShareChange?.(false);
+    } else {
+      try {
+        await media.startScreenShare();
+        screenBtn.classList.add('active');
+        (screenBtn.querySelector('.icon') as HTMLElement).textContent = '🖥️';
+        (screenBtn.querySelector('.label') as HTMLElement).textContent = '停止共享';
+        onScreenShareChange?.(true);
+      } catch {
+        // 用户取消共享或出错
+      }
+    }
+  };
 
   // 静音按钮
   muteBtn.onclick = () => {

@@ -348,6 +348,82 @@ body {
   display: none;
 }
 
+/* ---- 屏幕共享布局 ---- */
+
+#main-area {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.screen-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  min-width: 0;
+}
+
+#screen-video {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.peer-area {
+  overflow-y: auto;
+}
+
+/* ---- 纵向小头像列表 ---- */
+
+.peer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 16px;
+  min-width: 160px;
+  max-width: 200px;
+}
+
+.peer-list-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #1e293b;
+}
+
+.peer-list-item.speaking .small-avatar {
+  box-shadow: 0 0 0 2px #6366f1, 0 0 10px rgba(99, 102, 241, 0.4);
+}
+
+.small-avatar {
+  width: 36px;
+  height: 36px;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.peer-list-name {
+  font-size: 13px;
+  color: #cbd5e1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- 共享屏幕按钮激活态 ---- */
+
+.ctrl-btn.active {
+  background: #1d4ed8;
+}
+
+.ctrl-btn.active:hover {
+  background: #2563eb;
+}
+
 /* ---- 说话状态高亮 ---- */
 
 .peer-card.speaking .peer-avatar {

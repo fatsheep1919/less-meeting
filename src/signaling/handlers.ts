@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 import { WebSocket, WebSocketServer } from 'ws';
-import type { Room, Peer } from '../types';
+import type { Room, Peer, Producer } from '../types';
 import type { ClientMessage, ServerMessage } from '../types';
 import { roomManager } from '../room/RoomManager';
 import { getTransportConfig } from '../mediasoup/config';
@@ -227,12 +227,13 @@ export function createWSServer(): WebSocketServer {
           const peer = roomManager.getPeer(currentRoomId, peerId);
           if (peer) {
             peer.isMuted = msg.type === 'MUTE';
-            if (peer.producer) {
+            const audioProducer = peer.producers.get('audio');
+            if (audioProducer) {
               try {
                 if (peer.isMuted) {
-                  await peer.producer.pause();
+                  await audioProducer.pause();
                 } else {
-                  await peer.producer.resume();
+                  await audioProducer.resume();
                 }
               } catch {
                 // 忽略
@@ -295,11 +296,13 @@ async function handleCreateTransport(
     dtlsParameters: transport.dtlsParameters,
   });
 
-  // 如果是接收 Transport，为当前 Peer 订阅房间内所有已有的音频流
+  // 如果是接收 Transport，为当前 Peer 订阅房间内所有已有的流（音频 + 屏幕）
   if (!isSend) {
     for (const [otherId, otherPeer] of room.peers) {
-      if (otherId === peerId || !otherPeer.producer) continue;
-      createConsumerForPeer(room, peer, otherPeer.producer, otherId);
+      if (otherId === peerId) continue;
+      for (const producer of otherPeer.producers.values()) {
+        createConsumerForPeer(room, peer, producer, otherId);
+      }
     }
   }
 }
@@ -342,11 +345,10 @@ async function handleProduce(
       appData: { peerId },   // 存储 Producer 所属者的 peerId
     });
 
-    // 关闭旧 Producer
-    if (peer.producer) {
-      peer.producer.close();
-    }
-    peer.producer = producer;
+    // 关闭同类型旧 Producer，存储新 Producer
+    const existing = peer.producers.get(msg.kind);
+    if (existing) existing.close();
+    peer.producers.set(msg.kind, producer);
 
     send(ws, { type: 'PRODUCER_CREATED', producerId: producer.id });
 
@@ -362,7 +364,7 @@ async function handleProduce(
     }
   } catch (err) {
     console.error(`[WS] Produce 失败 (${peerId}):`, err);
-    send(ws, { type: 'ERROR', code: 'PRODUCE_FAILED', message: '创建音频流失败' });
+    send(ws, { type: 'ERROR', code: 'PRODUCE_FAILED', message: '创建媒体流失败' });
   }
 }
 
@@ -378,13 +380,14 @@ async function handleConsume(
   const room = roomManager.getRoom(roomId);
   if (!room) return;
 
-  // 找到对应的 Producer
-  // 遍历房间内其他人
+  // 找到对应的 Producer（遍历房间内其他人的所有 Producer）
   for (const [otherId, otherPeer] of room.peers) {
-    if (otherId === peerId || !otherPeer.producer) continue;
-    if (otherPeer.producer.id === msg.producerId) {
-      await createConsumerForPeer(room, peer, otherPeer.producer, otherId);
-      return;
+    if (otherId === peerId) continue;
+    for (const producer of otherPeer.producers.values()) {
+      if (producer.id === msg.producerId) {
+        await createConsumerForPeer(room, peer, producer, otherId);
+        return;
+      }
     }
   }
 
@@ -399,7 +402,7 @@ async function handleConsume(
 async function createConsumerForPeer(
   room: Room,
   peer: Peer,
-  producer: NonNullable<Peer['producer']>,
+  producer: Producer,
   producerOwnerId: string,   // Producer 所属者的 peerId
 ): Promise<void> {
   // 检查是否已存在该 Producer 的 Consumer
@@ -410,9 +413,8 @@ async function createConsumerForPeer(
   const transport = peer.recvTransport;
   if (!transport) return;
 
-  // 检查 Consumer 数量限制（每个 Peer 最多订阅 N-1 条流）
-  // 10 人的房间，每人最多 9 个 Consumer
-  if (peer.consumers.size >= config.maxPeersPerRoom - 1) {
+  // 检查 Consumer 数量限制（每个 Peer 最多订阅 (N-1)*2 条流，含音频+视频）
+  if (peer.consumers.size >= (config.maxPeersPerRoom - 1) * 2) {
     console.warn(`[WS] ${peer.displayName} Consumer 数量已达上限`);
     return;
   }
@@ -430,7 +432,7 @@ async function createConsumerForPeer(
       type: 'NEW_CONSUMER',
       peerId: producerOwnerId,                // Producer 所属者的 peerId（用于前端音频绑定）
       consumerId: consumer.id,
-      kind: consumer.kind as 'audio',
+      kind: consumer.kind as 'audio' | 'video',
       producerId: producer.id,
       rtpParameters: consumer.rtpParameters,
     });

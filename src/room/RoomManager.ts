@@ -72,6 +72,7 @@ class RoomManager {
       id: peerId,
       displayName,
       ws,
+      producers: new Map(),
       consumers: new Map(),
       isMuted: false,
     };
@@ -170,10 +171,11 @@ class RoomManager {
     }
     peer.consumers.clear();
 
-    // 关闭 Producer
-    if (peer.producer) {
-      peer.producer.close();
+    // 关闭所有 Producer
+    for (const producer of peer.producers.values()) {
+      producer.close();
     }
+    peer.producers.clear();
 
     // 关闭 Transport
     if (peer.sendTransport) {

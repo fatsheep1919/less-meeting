@@ -9,7 +9,7 @@ export class MediaClient {
   private device: Device | null = null;
   private sendTransport: types.Transport | null = null;
   private recvTransport: types.Transport | null = null;
-  private producer: types.Producer | null = null;
+  private producers = new Map<string, types.Producer>();  // key: 'audio' | 'video'
   private consumers = new Map<string, types.Consumer>();
   private signaling: SignalingClient;
   private localStream: MediaStream | null = null;
@@ -80,7 +80,7 @@ export class MediaClient {
         this.signaling.send({
           type: 'PRODUCE',
           transportId: transport.id,
-          kind: kind as 'audio',
+          kind: kind as 'audio' | 'video',
           rtpParameters: rtpParameters as any,
         });
 
@@ -177,12 +177,56 @@ export class MediaClient {
     const audioTrack = this.localStream.getAudioTracks()[0];
 
     if (audioTrack) {
-      this.producer = await this.sendTransport.produce({ track: audioTrack });
-      console.log('[Media] 开始推流, producerId:', this.producer.id);
+      const audioProducer = await this.sendTransport.produce({ track: audioTrack });
+      this.producers.set('audio', audioProducer);
+      console.log('[Media] 音频推流, producerId:', audioProducer.id);
 
       // 启动音量检测（用于说话状态指示）
       this.startVolumeDetection(this.localStream);
     }
+  }
+
+  /** 开始屏幕共享并推流视频 */
+  async startScreenShare(): Promise<types.Producer | null> {
+    if (!this.sendTransport) throw new Error('发送 Transport 未创建');
+
+    try {
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: false,
+      });
+      const videoTrack = screenStream.getVideoTracks()[0];
+      if (!videoTrack) return null;
+
+      const videoProducer = await this.sendTransport.produce({ track: videoTrack });
+      this.producers.set('video', videoProducer);
+      console.log('[Media] 屏幕共享推流, producerId:', videoProducer.id);
+
+      // 监听用户通过浏览器 UI 停止共享
+      videoTrack.addEventListener('ended', () => {
+        this.stopScreenShare();
+      });
+
+      return videoProducer;
+    } catch (err) {
+      console.error('[Media] 屏幕共享失败:', err);
+      throw err;
+    }
+  }
+
+  /** 停止屏幕共享 */
+  stopScreenShare(): void {
+    const videoProducer = this.producers.get('video');
+    if (videoProducer) {
+      videoProducer.close();
+      this.producers.delete('video');
+      console.log('[Media] 屏幕共享已停止');
+    }
+  }
+
+  /** 是否正在共享屏幕 */
+  isScreenSharing(): boolean {
+    return this.producers.has('video');
   }
 
   /**
@@ -270,10 +314,10 @@ export class MediaClient {
     track.enabled = !track.enabled;
     if (track.enabled) {
       this.signaling.send({ type: 'UNMUTE' });
-      this.producer?.resume();
+      this.producers.get('audio')?.resume();
     } else {
       this.signaling.send({ type: 'MUTE' });
-      this.producer?.pause();
+      this.producers.get('audio')?.pause();
     }
   }
 
@@ -290,7 +334,10 @@ export class MediaClient {
   /** 清理所有资源 */
   close(): void {
     this.stopVolumeDetection();
-    this.producer?.close();
+    for (const producer of this.producers.values()) {
+      producer.close();
+    }
+    this.producers.clear();
     this.consumers.forEach((c) => c.close());
     this.consumers.clear();
     this.sendTransport?.close();

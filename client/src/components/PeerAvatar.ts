@@ -20,6 +20,8 @@ function avatarColor(seed: string): string {
 export function renderPeerGrid(container: HTMLElement, speakingIds?: Set<string>): void {
   const peers = Array.from(state.peers.values());
 
+  container.className = 'peer-grid';
+
   if (peers.length === 0) {
     container.innerHTML = `<p class="empty-hint">等待其他参会者加入...</p>`;
     return;
@@ -59,6 +61,49 @@ export function attachAudioTrack(peerId: string, track: MediaStreamTrack): void 
 
   const stream = new MediaStream([track]);
   audioEl.srcObject = stream;
+}
+
+/**
+ * 将远程视频 Track 绑定到屏幕共享区 <video> 元素
+ */
+export function attachVideoTrack(
+  _peerId: string,
+  track: MediaStreamTrack,
+  onReady: () => void,
+): void {
+  const videoEl = document.getElementById('screen-video') as HTMLVideoElement;
+  if (videoEl) {
+    videoEl.srcObject = new MediaStream([track]);
+    videoEl.onloadedmetadata = () => {
+      videoEl.play().catch(() => {});
+      onReady();
+    };
+  }
+}
+
+/**
+ * 渲染纵向小头像列表（屏幕共享模式）
+ */
+export function renderPeerList(container: HTMLElement, speakingIds?: Set<string>): void {
+  const peers = Array.from(state.peers.values());
+
+  container.className = 'peer-list';
+
+  container.innerHTML = peers
+    .map(
+      (p) => {
+        const isSpeaking = speakingIds?.has(p.id) ?? false;
+        return `
+    <div class="peer-list-item${isSpeaking ? ' speaking' : ''}" id="peer-card-${p.id}">
+      <div class="peer-avatar small-avatar" style="background: ${avatarColor(p.id)}">
+        ${p.displayName.charAt(0).toUpperCase()}
+      </div>
+      <span class="peer-list-name" title="${escapeHtml(p.displayName)}">${escapeHtml(p.displayName)}</span>
+    </div>
+  `;
+      }
+    )
+    .join('');
 }
 
 function escapeHtml(s: string): string {

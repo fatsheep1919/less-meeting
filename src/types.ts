@@ -21,7 +21,7 @@ export type ClientMessage =
   | { type: 'LEAVE_ROOM' }
   | { type: 'CREATE_TRANSPORT'; direction: 'send' | 'recv' }
   | { type: 'CONNECT_TRANSPORT'; transportId: string; dtlsParameters: DtlsParameters }
-  | { type: 'PRODUCE'; transportId: string; kind: 'audio'; rtpParameters: RtpParameters }
+  | { type: 'PRODUCE'; transportId: string; kind: 'audio' | 'video'; rtpParameters: RtpParameters }
   | { type: 'CONSUME'; producerId: string; rtpCapabilities: RtpCapabilities }
   | { type: 'MUTE' }
   | { type: 'UNMUTE' }
@@ -36,7 +36,7 @@ export type ServerMessage =
   | { type: 'PEER_LEFT'; peerId: string }
   | { type: 'TRANSPORT_CREATED'; transportId: string; iceParameters: IceParameters; iceCandidates: IceCandidate[]; dtlsParameters: DtlsParameters }
   | { type: 'PRODUCER_CREATED'; producerId: string }
-  | { type: 'NEW_CONSUMER'; peerId: string; consumerId: string; kind: 'audio'; producerId: string; rtpParameters: RtpParameters }
+  | { type: 'NEW_CONSUMER'; peerId: string; consumerId: string; kind: 'audio' | 'video'; producerId: string; rtpParameters: RtpParameters }
   | { type: 'SPEAKER_ACTIVE'; peerId: string }
   | { type: 'SPEAKER_INACTIVE'; peerId: string }
   | { type: 'CHAT'; peerId: string; displayName: string; text: string }
@@ -60,7 +60,7 @@ export interface Peer {
   ws: import('ws').WebSocket;
   sendTransport?: WebRtcTransport;
   recvTransport?: WebRtcTransport;
-  producer?: Producer;
+  producers: Map<string, Producer>;         // key: 'audio' | 'video'
   consumers: Map<string, Consumer>;
   isMuted: boolean;
 }
