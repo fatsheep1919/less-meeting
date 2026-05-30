@@ -42,16 +42,18 @@ export function showMeeting(container: HTMLElement): void {
     const showScreen = screenSharePeerId && screenSharePeerId !== state.peerId;
 
     if (showScreen) {
-      // 屏幕共享模式：视频居左 + 列表占满右侧
+      // 屏幕共享模式：视频高度缩放 + 右侧列表 ≤25%
       screenContainer.style.display = 'flex';
       screenContainer.style.flex = '1';
       peerArea.style.flex = '1';
+      peerArea.style.maxWidth = '25%';
       renderPeerList(peerArea, speakingPeerIds);
     } else {
       // 默认模式：居中大网格
       screenContainer.style.display = 'none';
       screenContainer.style.flex = '';
       peerArea.style.flex = '1';
+      peerArea.style.maxWidth = '';
       renderPeerGrid(peerArea, speakingPeerIds);
     }
 
