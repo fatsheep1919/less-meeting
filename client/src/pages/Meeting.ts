@@ -3,6 +3,7 @@ import { MediaClient } from '../media';
 import { renderControlBar } from '../components/ControlBar';
 import { renderPeerGrid, renderPeerList, attachAudioTrack, attachVideoTrack } from '../components/PeerAvatar';
 import type { ServerMessage } from '../types';
+import { t } from '../i18n';
 
 /**
  * 会议页面 — 支持屏幕共享双布局
@@ -15,7 +16,7 @@ export function showMeeting(container: HTMLElement): void {
     <div class="meeting">
       <div id="room-header">
         <span class="room-name">${escapeHtml(state.roomName || state.roomId)}</span>
-        <button id="btn-copy-link" class="btn-copy-link" title="复制会议地址">📋 复制链接</button>
+        <button id="btn-copy-link" class="btn-copy-link" title="${t('copyLinkTitle')}">📋 ${t('copyLink')}</button>
       </div>
       <div id="main-area">
         <div id="screen-container" class="screen-container" style="display:none">
@@ -63,7 +64,7 @@ export function showMeeting(container: HTMLElement): void {
     if (screenBtn) {
       const othersSharing = screenSharePeerId && screenSharePeerId !== state.peerId;
       screenBtn.disabled = !!othersSharing;
-      screenBtn.title = othersSharing ? '其他人正在共享屏幕' : '共享屏幕';
+      screenBtn.title = othersSharing ? t('othersSharing') : t('screenTooltip');
     }
   }
 
@@ -107,7 +108,7 @@ export function showMeeting(container: HTMLElement): void {
       if (screenBtn) {
         screenBtn.classList.remove('active');
         (screenBtn.querySelector('.icon') as HTMLElement).textContent = '🖥️';
-        (screenBtn.querySelector('.label') as HTMLElement).textContent = '共享屏幕';
+        (screenBtn.querySelector('.label') as HTMLElement).textContent = t('shareScreen');
       }
     }
   });
@@ -172,8 +173,8 @@ export function showMeeting(container: HTMLElement): void {
     try {
       await navigator.clipboard.writeText(location.href);
       const btn = document.getElementById('btn-copy-link')!;
-      btn.textContent = '✅ 已复制';
-      setTimeout(() => { btn.textContent = '📋 复制链接'; }, 2000);
+      btn.textContent = '✅ ' + t('copied');
+      setTimeout(() => { btn.textContent = '📋 ' + t('copyLink'); }, 2000);
     } catch { /* fallback */ }
   };
 
@@ -186,7 +187,7 @@ export function showMeeting(container: HTMLElement): void {
   // 异步初始化媒体
   async function initMedia(): Promise<void> {
     const capabilities = state.routerRtpCapabilities;
-    if (!capabilities) throw new Error('未获取到路由器 RTP 能力');
+    if (!capabilities) throw new Error(t('noRtpCap'));
     await mediaClient.init(capabilities);
     await mediaClient.createRecvTransport();
     await mediaClient.createSendTransport();
@@ -200,13 +201,13 @@ export function showMeeting(container: HTMLElement): void {
     if (message.includes('BrowserMediaUnavailable')) {
       alert(message.replace('BrowserMediaUnavailable: ', ''));
     } else if (message.includes('NotAllowedError') || message.includes('Permission')) {
-      alert('需要麦克风权限才能加入会议，请在浏览器设置中允许麦克风访问');
+      alert(t('micPermission'));
     } else if (message.includes('NotFoundError')) {
-      alert('未检测到麦克风设备');
+      alert(t('micNotFound'));
     } else if (message.includes('NotReadableError')) {
-      alert('麦克风被其他应用占用');
+      alert(t('micBusy'));
     } else {
-      alert(`媒体连接失败: ${message}`);
+      alert(`${t('mediaFailed')}: ${message}`);
     }
   });
 }

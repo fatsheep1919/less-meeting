@@ -1,4 +1,5 @@
 import { state } from '../main';
+import { t } from '../i18n';
 
 /** 颜色池 */
 const AVATAR_COLORS = ['#4f46e5', '#0891b2', '#059669', '#d97706', '#dc2626', '#7c3aed', '#db2777'];
@@ -23,7 +24,7 @@ export function renderPeerGrid(container: HTMLElement, speakingIds?: Set<string>
   container.className = 'peer-grid';
 
   if (peers.length === 0) {
-    container.innerHTML = `<p class="empty-hint">等待其他参会者加入...</p>`;
+    container.innerHTML = `<p class="empty-hint">${t('waitingOthers')}</p>`;
     return;
   }
 

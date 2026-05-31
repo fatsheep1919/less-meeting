@@ -1,6 +1,7 @@
 import { Device, types } from 'mediasoup-client';
 import type { SignalingClient } from './ws';
 import type { ServerMessage } from './types';
+import { t } from './i18n';
 
 /**
  * Mediasoup 客户端 — 设备管理、Transport、Producer/Consumer
@@ -151,7 +152,7 @@ export class MediaClient {
 
   /** 打开麦克风并推流 */
   async startProduce(): Promise<void> {
-    if (!this.sendTransport) throw new Error('发送 Transport 未创建');
+    if (!this.sendTransport) throw new Error(t('noSendTransport'));
 
     // 检查是否在非安全上下文中（HTTP + 非 localhost）
     const isInsecureHttp = location.protocol === 'http:' &&
@@ -160,17 +161,9 @@ export class MediaClient {
 
     if (!navigator.mediaDevices?.getUserMedia) {
       if (isInsecureHttp) {
-        throw new Error(
-          'BrowserMediaUnavailable: 当前通过 HTTP 访问，浏览器禁止使用麦克风。\n' +
-          '解决方法：\n' +
-          '1. 配置域名并启用 HTTPS（推荐）\n' +
-          '2. 或使用 http://localhost 在本地测试'
-        );
+        throw new Error('BrowserMediaUnavailable: ' + t('micUnavailable'));
       }
-      throw new Error(
-        'BrowserMediaUnavailable: 当前浏览器不支持麦克风访问。\n' +
-        '请使用最新版 Chrome/Edge/Firefox。'
-      );
+      throw new Error('BrowserMediaUnavailable: ' + t('micNotSupported'));
     }
 
     this.localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -188,7 +181,7 @@ export class MediaClient {
 
   /** 开始屏幕共享并推流视频 */
   async startScreenShare(): Promise<types.Producer | null> {
-    if (!this.sendTransport) throw new Error('发送 Transport 未创建');
+    if (!this.sendTransport) throw new Error(t('noSendTransport'));
 
     try {
       const screenStream = await navigator.mediaDevices.getDisplayMedia({

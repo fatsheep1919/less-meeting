@@ -1,5 +1,6 @@
 import { state } from '../main';
 import type { MediaClient } from '../media';
+import { t } from '../i18n';
 
 /**
  * 底部控制栏：自己的头像昵称 + 静音 + 退出
@@ -19,17 +20,17 @@ export function renderControlBar(
       </div>
 
       <div class="control-buttons">
-        <button id="btn-screen" class="ctrl-btn" title="共享屏幕">
+        <button id="btn-screen" class="ctrl-btn" title="${t('screenTooltip')}">
           <span class="icon">🖥️</span>
-          <span class="label">共享屏幕</span>
+          <span class="label">${t('shareScreen')}</span>
         </button>
-        <button id="btn-mute" class="ctrl-btn" title="静音">
+        <button id="btn-mute" class="ctrl-btn" title="${t('muteTooltip')}">
           <span class="icon">🎤</span>
-          <span class="label">麦克风</span>
+          <span class="label">${t('mic')}</span>
         </button>
-        <button id="btn-leave" class="ctrl-btn leave-btn" title="退出">
+        <button id="btn-leave" class="ctrl-btn leave-btn" title="${t('leaveTooltip')}">
           <span class="icon">📞</span>
-          <span class="label">退出</span>
+          <span class="label">${t('leave')}</span>
         </button>
       </div>
     </div>
@@ -44,14 +45,14 @@ export function renderControlBar(
       media.stopScreenShare();
       screenBtn.classList.remove('active');
       (screenBtn.querySelector('.icon') as HTMLElement).textContent = '🖥️';
-      (screenBtn.querySelector('.label') as HTMLElement).textContent = '共享屏幕';
+      (screenBtn.querySelector('.label') as HTMLElement).textContent = t('shareScreen');
       onScreenShareChange?.(false);
     } else {
       try {
         await media.startScreenShare();
         screenBtn.classList.add('active');
         (screenBtn.querySelector('.icon') as HTMLElement).textContent = '🖥️';
-        (screenBtn.querySelector('.label') as HTMLElement).textContent = '停止共享';
+        (screenBtn.querySelector('.label') as HTMLElement).textContent = t('stopSharing');
         onScreenShareChange?.(true);
       } catch {
         // 用户取消共享或出错
@@ -65,7 +66,7 @@ export function renderControlBar(
     const muted = media.isMuted();
     muteBtn.classList.toggle('muted', muted);
     (muteBtn.querySelector('.icon') as HTMLElement).textContent = muted ? '🔇' : '🎤';
-    (muteBtn.querySelector('.label') as HTMLElement).textContent = muted ? '已静音' : '麦克风';
+    (muteBtn.querySelector('.label') as HTMLElement).textContent = muted ? t('muted') : t('mic');
   };
 
   // 退出按钮
@@ -86,7 +87,7 @@ export function renderControlBar(
         document.body.innerHTML = `
           <div style="display:flex;align-items:center;justify-content:center;height:100vh;
                       background:#0f172a;color:#94a3b8;font-family:sans-serif;font-size:18px">
-            已退出会议，可以关闭此页面
+            ${t('leftMeeting')}
           </div>`;
       }
     }, 300);

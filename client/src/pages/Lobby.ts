@@ -1,6 +1,7 @@
 import { navigateTo, state } from '../main';
 import { SignalingClient } from '../ws';
 import type { ServerMessage } from '../types';
+import { t } from '../i18n';
 
 /**
  * 首页 —— 简化为两种模式：
@@ -32,19 +33,19 @@ function renderCreateOnly(container: HTMLElement): void {
   container.innerHTML = `
     <div class="lobby">
       <h1>🎙️ Less Meeting</h1>
-      <p class="subtitle">轻量级语音会议</p>
+      <p class="subtitle">${t('appSubtitle')}</p>
 
       <div class="lobby-card">
         <div class="create-section">
-          <input id="input-room-name" type="text" placeholder="输入房间名称" maxlength="20" autocomplete="off" />
-          <button id="btn-create-room" class="btn-primary">创建新房间</button>
+          <input id="input-room-name" type="text" placeholder="${t('roomNameInput')}" maxlength="20" autocomplete="off" />
+          <button id="btn-create-room" class="btn-primary">${t('createRoom')}</button>
 
           <div id="created-result" style="display:none">
-            <p class="url-label">会议链接（可分享给参会者）</p>
+            <p class="url-label">${t('urlLabel')}</p>
             <div class="url-row">
               <input id="input-room-url" type="text" readonly />
-              <button id="btn-copy-url" class="btn-copy">复制链接</button>
-              <button id="btn-enter-meeting" class="btn-enter">进入会议</button>
+              <button id="btn-copy-url" class="btn-copy">${t('copyLink')}</button>
+              <button id="btn-enter-meeting" class="btn-enter">${t('enterMeeting')}</button>
             </div>
           </div>
         </div>
@@ -64,7 +65,7 @@ function renderCreateOnly(container: HTMLElement): void {
   // ---- 创建房间 ----
   document.getElementById('btn-create-room')!.onclick = async () => {
     const name = (document.getElementById('input-room-name') as HTMLInputElement).value.trim();
-    if (!name) { showError('请输入房间名称'); return; }
+    if (!name) { showError(t('needRoomName')); return; }
 
     try {
       const res = await fetch('/rooms', {
@@ -83,7 +84,7 @@ function renderCreateOnly(container: HTMLElement): void {
       (document.getElementById('input-room-url') as HTMLInputElement).value = urlStr;
       document.getElementById('created-result')!.style.display = 'block';
     } catch {
-      showError('创建房间失败，请确认服务端已启动');
+      showError(t('createRoomFail'));
     }
   };
 
@@ -93,13 +94,13 @@ function renderCreateOnly(container: HTMLElement): void {
     const btn = document.getElementById('btn-copy-url')!;
     try {
       await navigator.clipboard.writeText(input.value);
-      btn.textContent = '已复制';
-      setTimeout(() => { btn.textContent = '复制链接'; }, 2000);
+      btn.textContent = t('copied');
+      setTimeout(() => { btn.textContent = t('copyLink'); }, 2000);
     } catch {
       input.select();
       document.execCommand('copy');
-      btn.textContent = '已复制';
-      setTimeout(() => { btn.textContent = '复制链接'; }, 2000);
+      btn.textContent = t('copied');
+      setTimeout(() => { btn.textContent = t('copyLink'); }, 2000);
     }
   };
 
@@ -137,13 +138,13 @@ async function renderDirectLink(container: HTMLElement, roomId: string, passcode
   container.innerHTML = `
     <div class="lobby">
       <h1>🎙️ Less Meeting</h1>
-      <p class="subtitle">通过分享链接加入会议</p>
+      <p class="subtitle">${t('joinViaLink')}</p>
 
       <div class="lobby-card">
         ${roomName ? `<div class="room-name-banner">${escapeHtml(roomName)}</div>` : ''}
         <div class="join-form">
-          <input id="input-nickname" type="text" placeholder="你的昵称" maxlength="12" autocomplete="off" />
-          <button id="btn-join-room" class="btn-primary">加入会议</button>
+          <input id="input-nickname" type="text" placeholder="${t('nicknameInput')}" maxlength="12" autocomplete="off" />
+          <button id="btn-join-room" class="btn-primary">${t('joinMeeting')}</button>
         </div>
       </div>
 
@@ -160,7 +161,7 @@ async function renderDirectLink(container: HTMLElement, roomId: string, passcode
 
   document.getElementById('btn-join-room')!.onclick = () => {
     const displayName = (document.getElementById('input-nickname') as HTMLInputElement).value.trim();
-    if (!displayName) { showError('请输入你的昵称'); return; }
+    if (!displayName) { showError(t('needNickname')); return; }
     joinRoom(roomId, passcode, displayName, undefined, showError);
   };
 
@@ -224,7 +225,7 @@ async function joinRoom(
       signaling.close();
     });
   } catch {
-    showError('无法连接到服务器');
+    showError(t('errorConnect'));
   }
 }
 
