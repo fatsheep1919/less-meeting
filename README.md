@@ -16,7 +16,7 @@
 
 ### 简介
 
-Less Meeting 是一个从零构建的轻量级在线语音会议系统。整个项目使用 **[DeepSeek TUI](https://github.com/deepseek-ai/deepseek-tui)** 终端工具配合 `deepseek-v4-pro` 模型，以 **Vibe Coding** 方式完成开发——从设计架构、搭建骨架、调试信令、修复音频路由到实现屏幕共享，全程 AI 辅助。
+Less Meeting 是一个从零构建的轻量级在线语音会议系统。整个项目使用 **[CodeWhale](https://github.com/Hmbown/CodeWhale)** 终端工具配合 `deepseek-v4-pro` 模型，以 **Vibe Coding** 方式完成开发——从设计架构、搭建骨架、调试信令、修复音频路由到实现屏幕共享，全程 AI 辅助。
 
 **核心功能：**
 
@@ -87,9 +87,7 @@ docker compose up -d --build
 ### 截图
 
 <p align="center">
-  <img src="./docs/screenshots/lobby.png" alt="创建房间" width="45%">
-  &nbsp;&nbsp;
-  <img src="./docs/screenshots/meeting.png" alt="会议界面" width="45%">
+  <img src="./docs/screenshots/meeting.png" alt="会议界面" width="100%">
 </p>
 
 ---
@@ -161,7 +159,7 @@ less-meeting/
 
 ### Overview
 
-Less Meeting is a lightweight online voice conference system built from scratch. The entire project was developed using **[DeepSeek TUI](https://github.com/deepseek-ai/deepseek-tui)** with the `deepseek-v4-pro` model in a **Vibe Coding** workflow — from architecture design, scaffolding, signaling debugging, audio routing fixes, to screen sharing implementation.
+Less Meeting is a lightweight online voice conference system built from scratch. The entire project was developed using **[CodeWhale](https://github.com/Hmbown/CodeWhale)** with the `deepseek-v4-pro` model in a **Vibe Coding** workflow — from architecture design, scaffolding, signaling debugging, audio routing fixes, to screen sharing implementation.
 
 **Core Features:**
 
@@ -227,9 +225,7 @@ docker compose up -d --build
 ### Screenshots
 
 <p align="center">
-  <img src="./docs/screenshots/lobby.png" alt="Lobby" width="45%">
-  &nbsp;&nbsp;
-  <img src="./docs/screenshots/meeting.png" alt="Meeting" width="45%">
+  <img src="./docs/screenshots/meeting.png" alt="Meeting" width="100%">
 </p>
 
 > Replace `docs/screenshots/` with actual screenshots before deployment.
