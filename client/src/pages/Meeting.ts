@@ -59,8 +59,8 @@ export function showMeeting(container: HTMLElement): void {
       renderPeerGrid(peerArea, speakingPeerIds);
     }
 
-    // 别人在共享时，禁用共享按钮
-    const screenBtn = document.getElementById('btn-screen') as HTMLButtonElement;
+    // 别人在共享时，禁用共享按钮（移动端无此按钮，跳过）
+    const screenBtn = document.getElementById('btn-screen') as HTMLButtonElement | null;
     if (screenBtn) {
       const othersSharing = screenSharePeerId && screenSharePeerId !== state.peerId;
       screenBtn.disabled = !!othersSharing;
@@ -107,11 +107,11 @@ export function showMeeting(container: HTMLElement): void {
       screenSharePeerId = null;
       renderLayout();
       // 重置 ControlBar 按钮状态
-      const screenBtn = document.getElementById('btn-screen');
-      if (screenBtn) {
-        screenBtn.classList.remove('active');
-        (screenBtn.querySelector('.icon') as HTMLElement).textContent = '🖥️';
-        (screenBtn.querySelector('.label') as HTMLElement).textContent = t('shareScreen');
+      const screenResetBtn = document.getElementById('btn-screen');
+      if (screenResetBtn) {
+        screenResetBtn.classList.remove('active');
+        (screenResetBtn.querySelector('.icon') as HTMLElement).textContent = '🖥️';
+        (screenResetBtn.querySelector('.label') as HTMLElement).textContent = t('shareScreen');
       }
     }
   });

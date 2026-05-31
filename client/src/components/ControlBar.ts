@@ -39,9 +39,10 @@ export function renderControlBar(
 
   const muteBtn = document.getElementById('btn-mute')!;
 
-  // 共享屏幕按钮
-  const screenBtn = document.getElementById('btn-screen')!;
-  screenBtn.onclick = async () => {
+  // 共享屏幕按钮（移动端不存在，跳过）
+  const screenBtn = document.getElementById('btn-screen');
+  if (screenBtn) {
+    screenBtn.onclick = async () => {
     if (media.isScreenSharing()) {
       media.stopScreenShare();
       screenBtn.classList.remove('active');
@@ -59,7 +60,8 @@ export function renderControlBar(
         // 用户取消共享或出错
       }
     }
-  };
+    };
+  }
 
   // 静音按钮
   muteBtn.onclick = () => {
