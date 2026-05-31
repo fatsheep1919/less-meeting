@@ -59,6 +59,11 @@ const dict: Record<string, Record<Lang, string>> = {
   mediaFailed:    { zh: '媒体连接失败',             en: 'Media connection failed' },
 };
 
+/** 是否为移动端浏览器 */
+export function isMobile(): boolean {
+  return /Android|iPhone|iPad|iPod|webOS/i.test(typeof navigator !== 'undefined' ? navigator.userAgent : '');
+}
+
 export function t(key: string): string {
   const entry = dict[key];
   if (!entry) return key;

@@ -3,7 +3,7 @@ import { MediaClient } from '../media';
 import { renderControlBar } from '../components/ControlBar';
 import { renderPeerGrid, renderPeerList, attachAudioTrack, attachVideoTrack } from '../components/PeerAvatar';
 import type { ServerMessage } from '../types';
-import { t } from '../i18n';
+import { t, isMobile } from '../i18n';
 
 /**
  * 会议页面 — 支持屏幕共享双布局
@@ -71,6 +71,9 @@ export function showMeeting(container: HTMLElement): void {
   // 注册 Consumer 回调
   mediaClient.setOnNewConsumer((peerId, consumer) => {
     if (consumer.kind === 'video') {
+      // 移动端忽略视频流
+      if (isMobile()) return;
+
       // 监听远程停止共享（producer 关闭 → consumer track ended）
       consumer.track.onended = () => {
         if (screenSharePeerId === peerId) {

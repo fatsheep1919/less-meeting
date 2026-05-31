@@ -308,7 +308,7 @@ async function handleCreateTransport(
     dtlsParameters: transport.dtlsParameters,
   });
 
-  // 如果是接收 Transport，为当前 Peer 订阅房间内所有已有的流（音频 + 屏幕）
+  // 立即尝试为新人订阅已有流（先 connect，后补）
   if (!isSend) {
     for (const [otherId, otherPeer] of room.peers) {
       if (otherId === peerId) continue;

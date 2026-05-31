@@ -12,6 +12,7 @@ export class MediaClient {
   private recvTransport: types.Transport | null = null;
   private producers = new Map<string, types.Producer>();  // key: 'audio' | 'video'
   private consumers = new Map<string, types.Consumer>();
+
   private signaling: SignalingClient;
   private localStream: MediaStream | null = null;
 

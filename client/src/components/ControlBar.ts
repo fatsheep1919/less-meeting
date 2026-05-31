@@ -1,6 +1,6 @@
 import { state } from '../main';
 import type { MediaClient } from '../media';
-import { t } from '../i18n';
+import { t, isMobile } from '../i18n';
 
 /**
  * 底部控制栏：自己的头像昵称 + 静音 + 退出
@@ -20,10 +20,11 @@ export function renderControlBar(
       </div>
 
       <div class="control-buttons">
+        ${isMobile() ? '' : `
         <button id="btn-screen" class="ctrl-btn" title="${t('screenTooltip')}">
           <span class="icon">🖥️</span>
           <span class="label">${t('shareScreen')}</span>
-        </button>
+        </button>`}
         <button id="btn-mute" class="ctrl-btn" title="${t('muteTooltip')}">
           <span class="icon">🎤</span>
           <span class="label">${t('mic')}</span>
