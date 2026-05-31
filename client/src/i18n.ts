@@ -40,6 +40,7 @@ const dict: Record<string, Record<Lang, string>> = {
   needRoomName:   { zh: '请输入房间名称',           en: 'Please enter a room name' },
   needNickname:   { zh: '请输入你的昵称',           en: 'Please enter your nickname' },
   createRoomFail: { zh: '创建房间失败，请确认服务端已启动', en: 'Failed to create room. Check if server is running.' },
+  roomNotExist:   { zh: '会议已结束或房间不存在',            en: 'Meeting has ended or room does not exist.' },
   noRtpCap:       { zh: '未获取到路由器 RTP 能力', en: 'Router RTP capabilities not received' },
   noSendTransport:{ zh: '发送 Transport 未创建',   en: 'Send transport not created' },
 

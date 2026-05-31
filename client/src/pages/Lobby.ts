@@ -123,16 +123,20 @@ function renderCreateOnly(container: HTMLElement): void {
 // ============================================
 
 async function renderDirectLink(container: HTMLElement, roomId: string, passcode: string): Promise<void> {
-  // 获取房间名
+  // 检查房间是否存在
   let roomName = '';
   try {
     const res = await fetch(`/api/rooms/${roomId}`);
     if (res.ok) {
       const data = await res.json();
       roomName = data.name || '';
+    } else {
+      container.innerHTML = `<div class="lobby"><h1>🎙️ Less Meeting</h1><p class="error">${t('roomNotExist')}</p></div>`;
+      return;
     }
   } catch {
-    // 获取失败就留空
+    container.innerHTML = `<div class="lobby"><h1>🎙️ Less Meeting</h1><p class="error">${t('errorConnect')}</p></div>`;
+    return;
   }
 
   container.innerHTML = `
