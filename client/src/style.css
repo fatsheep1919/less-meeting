@@ -437,6 +437,7 @@ body {
   flex: 1 !important;
   max-width: none !important;
   max-height: 100dvh;
+  padding: 5px 0;
 }
 
 .meeting.fullscreen-mode #screen-video {
