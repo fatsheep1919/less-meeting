@@ -21,6 +21,7 @@ export function showMeeting(container: HTMLElement): void {
       <div id="main-area">
         <div id="screen-container" class="screen-container" style="display:none">
           <video id="screen-video" autoplay playsinline muted></video>
+          <button id="btn-fullscreen" class="screen-fullscreen-btn" title="${t('fullscreen')}">⛶</button>
         </div>
         <div id="peer-area" class="peer-area"></div>
       </div>
@@ -169,6 +170,28 @@ export function showMeeting(container: HTMLElement): void {
   signaling.on('ERROR', (msg: ServerMessage) => {
     if (msg.type !== 'ERROR') return;
     alert(`错误: ${msg.message}`);
+  });
+
+  // 全屏切换
+  const fullscreenBtn = document.getElementById('btn-fullscreen')!;
+  const screenContainer = document.getElementById('screen-container')!;
+
+  fullscreenBtn.onclick = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      screenContainer.requestFullscreen();
+    }
+  };
+
+  document.addEventListener('fullscreenchange', () => {
+    if (document.fullscreenElement) {
+      fullscreenBtn.innerHTML = '⛷';
+      fullscreenBtn.title = t('exitFullscreen');
+    } else {
+      fullscreenBtn.innerHTML = '⛶';
+      fullscreenBtn.title = t('fullscreen');
+    }
   });
 
   // 复制会议链接

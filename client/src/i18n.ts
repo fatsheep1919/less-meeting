@@ -57,6 +57,8 @@ const dict: Record<string, Record<Lang, string>> = {
   micNotFound:    { zh: '未检测到麦克风设备',       en: 'No microphone device detected.' },
   micBusy:        { zh: '麦克风被其他应用占用',     en: 'Microphone is being used by another application.' },
   mediaFailed:    { zh: '媒体连接失败',             en: 'Media connection failed' },
+  fullscreen:     { zh: '全屏',                     en: 'Fullscreen' },
+  exitFullscreen: { zh: '退出全屏',                  en: 'Exit Fullscreen' },
 };
 
 /** 是否为移动端浏览器 */
