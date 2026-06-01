@@ -12,6 +12,11 @@ export function showMeeting(container: HTMLElement): void {
   // 谁在共享屏幕（自己的 peerId 或远程 peerId）
   let screenSharePeerId: string | null = null;
 
+  // 页面内全屏状态
+  let isFullscreen = false;
+  let meetingEl: Element;
+  let fullscreenBtn: HTMLElement;
+
   container.innerHTML = `
     <div class="meeting">
       <div id="room-header">
@@ -21,7 +26,7 @@ export function showMeeting(container: HTMLElement): void {
       <div id="main-area">
         <div id="screen-container" class="screen-container" style="display:none">
           <video id="screen-video" autoplay playsinline muted></video>
-          <button id="btn-fullscreen" class="screen-fullscreen-btn" title="${t('fullscreen')}">⛶</button>
+          <button id="btn-fullscreen" class="screen-fullscreen-btn" title="${t('fullscreen')}">${t('fullscreen')}</button>
         </div>
         <div id="peer-area" class="peer-area"></div>
       </div>
@@ -34,6 +39,9 @@ export function showMeeting(container: HTMLElement): void {
   state.media = mediaClient;
 
   const speakingPeerIds = new Set<string>();
+
+  meetingEl = document.querySelector('.meeting')!;
+  fullscreenBtn = document.getElementById('btn-fullscreen')!;
 
   // 刷新布局
   function renderLayout(): void {
@@ -58,6 +66,14 @@ export function showMeeting(container: HTMLElement): void {
       peerArea.style.cssText = '';
       peerArea.style.flex = '1';
       renderPeerGrid(peerArea, speakingPeerIds);
+
+      // 屏幕共享停止时自动退出页面内全屏
+      if (isFullscreen) {
+        isFullscreen = false;
+        meetingEl.classList.remove('fullscreen-mode');
+        fullscreenBtn.textContent = t('fullscreen');
+        fullscreenBtn.title = t('fullscreen');
+      }
     }
 
     // 别人在共享时，禁用共享按钮（移动端无此按钮，跳过）
@@ -172,27 +188,13 @@ export function showMeeting(container: HTMLElement): void {
     alert(`错误: ${msg.message}`);
   });
 
-  // 全屏切换
-  const fullscreenBtn = document.getElementById('btn-fullscreen')!;
-  const screenContainer = document.getElementById('screen-container')!;
-
+  // 全屏切换（页面内全屏，隐藏顶栏/底栏/右侧列表）
   fullscreenBtn.onclick = () => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    } else {
-      screenContainer.requestFullscreen();
-    }
+    isFullscreen = !isFullscreen;
+    meetingEl.classList.toggle('fullscreen-mode', isFullscreen);
+    fullscreenBtn.textContent = isFullscreen ? t('exitFullscreen') : t('fullscreen');
+    fullscreenBtn.title = isFullscreen ? t('exitFullscreen') : t('fullscreen');
   };
-
-  document.addEventListener('fullscreenchange', () => {
-    if (document.fullscreenElement) {
-      fullscreenBtn.innerHTML = '⛷';
-      fullscreenBtn.title = t('exitFullscreen');
-    } else {
-      fullscreenBtn.innerHTML = '⛶';
-      fullscreenBtn.title = t('fullscreen');
-    }
-  });
 
   // 复制会议链接
   document.getElementById('btn-copy-link')!.onclick = async () => {
