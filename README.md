@@ -6,9 +6,147 @@
 
 # 🎙️ Less Meeting
 
-**轻量级在线语音会议系统** / *Lightweight Online Voice Conference System*
+*Lightweight Online Voice Conference System* / **轻量级在线语音会议系统**
 
-[中文](#中文) · [English](#English)
+[English](#English) · [中文](#中文)
+
+---
+
+## English
+
+### Overview
+
+Less Meeting is a lightweight online voice conference system built from scratch. The entire project was developed using **[CodeWhale](https://github.com/Hmbown/CodeWhale)** with the **[deepseek-v4-pro](https://www.deepseek.com/)** model in a **Vibe Coding** workflow — from architecture design, scaffolding, signaling debugging, audio routing fixes, to screen sharing implementation.
+
+**Core Features:**
+
+- 🎤 Multi-party real-time voice calls (Mediasoup SFU)
+- 🖥️ Screen sharing (VP8 video, height-adaptive scaling)
+- 🗣️ Active speaker detection (RMS analysis + visual highlight)
+- 🔇 Mute / unmute microphone
+- 🔗 One-click shareable meeting links
+- 🌐 Bilingual UI (auto-detected from browser language)
+- 📱 Responsive layout, mobile-friendly
+
+---
+
+### Installation & Deployment
+
+#### Local Development
+
+```bash
+# 1. Node.js >= 22 required
+node -v
+
+# 2. Install dependencies
+npm install
+cd client && npm install && cd ..
+
+# 3. Build frontend
+cd client && npm run build && cd ..
+
+# 4. Start server
+npm run dev
+
+# 5. Open http://localhost:3000
+```
+
+> For frontend hot-reload during development, run `cd client && npm run dev` in a separate terminal (port 3001).
+
+#### Production (Docker)
+
+See [DEPLOY.md](./DEPLOY.md) for details. Quick start:
+
+```bash
+cp .env.example .env
+vim .env   # Set ANNOUNCED_IP=your_public_ip
+bash gen-certs.sh                            # Self-signed cert
+# OR certbot certonly --standalone -d DOMAIN # Let's Encrypt
+docker compose up -d --build
+```
+
+> ⚠️ **HTTPS is required**: browsers block microphone access on non-secure contexts.
+
+---
+
+### Usage
+
+1. Open `https://your-domain`, enter a room name → click **Create New Room**
+2. Copy the meeting link and share with participants
+3. Participants open the link, enter their nickname → click **Join Meeting**
+4. Grant microphone permission to start real-time voice calls
+5. Click **Share Screen** to broadcast your desktop
+
+---
+
+### Screenshots
+
+<p align="center">
+  <img src="./docs/screenshots/meeting.png" alt="Meeting" width="100%">
+</p>
+
+---
+
+### Tech Stack
+
+| Layer | Technology | Version |
+|-------|-----------|---------|
+| **Language** | TypeScript | ^5.6 |
+| **Runtime** | Node.js | ≥22.10 |
+| **SFU Media Server** | Mediasoup | ^3.19 |
+| **Signaling / WebSocket** | ws | ^8.18 |
+| **HTTP Server** | Express | ^4.21 |
+| **Frontend Bundler** | Vite | ^6.0 |
+| **WebRTC Client** | mediasoup-client | ^3.7 |
+| **Containerization** | Docker + Compose | — |
+| **Reverse Proxy / SSL** | Nginx (alpine) | — |
+| **Dev Runtime** | tsx | ^4.19 |
+
+**Architecture:**
+
+```
+Browser (Chrome/Edge/Firefox)
+    │  WebSocket signaling + WebRTC (UDP)
+    ▼
+Nginx (HTTPS :443, WSS proxy)
+    │
+    ▼
+Express + ws (:3000 internal)
+    │
+    ▼
+Mediasoup Worker → Router → Transport → Producer/Consumer
+    │
+    ▼
+UDP 40000-49999 (RTP media streams)
+```
+
+---
+
+### Project Structure
+
+```
+less-meeting/
+├── src/                     # Server
+│   ├── index.ts             # Entry (Express + WebSocket)
+│   ├── config.ts            # Global config
+│   ├── types.ts             # Type definitions + signaling protocol
+│   ├── mediasoup/           # SFU config (Worker/Router/Codec)
+│   ├── room/                # Room management
+│   ├── signaling/           # WebSocket signaling handlers
+│   └── utils/               # Utilities
+├── client/                  # Frontend (Vite + TypeScript)
+│   └── src/
+│       ├── i18n.ts          # Internationalization (zh/en)
+│       ├── media.ts         # Mediasoup client wrapper
+│       ├── ws.ts            # WebSocket signaling client
+│       └── pages/           # Lobby / Meeting pages
+├── public/                  # Build output (served by Express)
+├── nginx.conf               # Nginx HTTPS + WSS config
+├── Dockerfile               # Multi-stage build
+├── docker-compose.yml       # Container orchestration
+├── gen-certs.sh             # Self-signed cert generator
+└── DEPLOY.md                # Detailed deployment guide
+```
 
 ---
 
@@ -151,144 +289,6 @@ less-meeting/
 ├── docker-compose.yml       # 容器编排
 ├── gen-certs.sh             # 自签名证书生成
 └── DEPLOY.md                # 部署详细指南
-```
-
----
-
-## English
-
-### Overview
-
-Less Meeting is a lightweight online voice conference system built from scratch. The entire project was developed using **[CodeWhale](https://github.com/Hmbown/CodeWhale)** with the **[deepseek-v4-pro](https://www.deepseek.com/)** model in a **Vibe Coding** workflow — from architecture design, scaffolding, signaling debugging, audio routing fixes, to screen sharing implementation.
-
-**Core Features:**
-
-- 🎤 Multi-party real-time voice calls (Mediasoup SFU)
-- 🖥️ Screen sharing (VP8 video, height-adaptive scaling)
-- 🗣️ Active speaker detection (RMS analysis + visual highlight)
-- 🔇 Mute / unmute microphone
-- 🔗 One-click shareable meeting links
-- 🌐 Bilingual UI (auto-detected from browser language)
-- 📱 Responsive layout, mobile-friendly
-
----
-
-### Installation & Deployment
-
-#### Local Development
-
-```bash
-# 1. Node.js >= 22 required
-node -v
-
-# 2. Install dependencies
-npm install
-cd client && npm install && cd ..
-
-# 3. Build frontend
-cd client && npm run build && cd ..
-
-# 4. Start server
-npm run dev
-
-# 5. Open http://localhost:3000
-```
-
-> For frontend hot-reload during development, run `cd client && npm run dev` in a separate terminal (port 3001).
-
-#### Production (Docker)
-
-See [DEPLOY.md](./DEPLOY.md) for details. Quick start:
-
-```bash
-cp .env.example .env
-vim .env   # Set ANNOUNCED_IP=your_public_ip
-bash gen-certs.sh                            # Self-signed cert
-# OR certbot certonly --standalone -d DOMAIN # Let's Encrypt
-docker compose up -d --build
-```
-
-> ⚠️ **HTTPS is required**: browsers block microphone access on non-secure contexts.
-
----
-
-### Usage
-
-1. Open `https://your-domain`, enter a room name → click **Create New Room**
-2. Copy the meeting link and share with participants
-3. Participants open the link, enter their nickname → click **Join Meeting**
-4. Grant microphone permission to start real-time voice calls
-5. Click **Share Screen** to broadcast your desktop
-
----
-
-### Screenshots
-
-<p align="center">
-  <img src="./docs/screenshots/meeting.png" alt="Meeting" width="100%">
-</p>
-
----
-
-### Tech Stack
-
-| Layer | Technology | Version |
-|-------|-----------|---------|
-| **Language** | TypeScript | ^5.6 |
-| **Runtime** | Node.js | ≥22.10 |
-| **SFU Media Server** | Mediasoup | ^3.19 |
-| **Signaling / WebSocket** | ws | ^8.18 |
-| **HTTP Server** | Express | ^4.21 |
-| **Frontend Bundler** | Vite | ^6.0 |
-| **WebRTC Client** | mediasoup-client | ^3.7 |
-| **Containerization** | Docker + Compose | — |
-| **Reverse Proxy / SSL** | Nginx (alpine) | — |
-| **Dev Runtime** | tsx | ^4.19 |
-
-**Architecture:**
-
-```
-Browser (Chrome/Edge/Firefox)
-    │  WebSocket signaling + WebRTC (UDP)
-    ▼
-Nginx (HTTPS :443, WSS proxy)
-    │
-    ▼
-Express + ws (:3000 internal)
-    │
-    ▼
-Mediasoup Worker → Router → Transport → Producer/Consumer
-    │
-    ▼
-UDP 40000-49999 (RTP media streams)
-```
-
----
-
-### Project Structure
-
-```
-less-meeting/
-├── src/                     # Server
-│   ├── index.ts             # Entry (Express + WebSocket)
-│   ├── config.ts            # Global config
-│   ├── types.ts             # Type definitions + signaling protocol
-│   ├── mediasoup/           # SFU config (Worker/Router/Codec)
-│   ├── room/                # Room management
-│   ├── signaling/           # WebSocket signaling handlers
-│   └── utils/               # Utilities
-├── client/                  # Frontend (Vite + TypeScript)
-│   └── src/
-│       ├── i18n.ts          # Internationalization (zh/en)
-│       ├── media.ts         # Mediasoup client wrapper
-│       ├── ws.ts            # WebSocket signaling client
-│       └── pages/           # Lobby / Meeting pages
-├── public/                  # Build output (served by Express)
-├── nginx.conf               # Nginx HTTPS + WSS config
-├── Dockerfile               # Multi-stage build
-├── docker-compose.yml       # Container orchestration
-├── gen-certs.sh             # Self-signed cert generator
-└── DEPLOY.md                # Detailed deployment guide
 ```
 
 ---
