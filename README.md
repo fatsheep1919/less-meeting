@@ -8,7 +8,7 @@
 
 **轻量级在线语音会议系统** / *Lightweight Online Voice Conference System*
 
-[中文](#中文) · [English](#english)
+[中文](#中文) · [English](#English)
 
 ---
 
@@ -227,8 +227,6 @@ docker compose up -d --build
 <p align="center">
   <img src="./docs/screenshots/meeting.png" alt="Meeting" width="100%">
 </p>
-
-> Replace `docs/screenshots/` with actual screenshots before deployment.
 
 ---
 
